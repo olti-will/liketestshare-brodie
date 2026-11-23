@@ -3,6 +3,8 @@ namespace SpriteKind {
     export const UFO = SpriteKind.create()
     export const Turret = SpriteKind.create()
 }
+// Aliens die when a bullet hits it, and it also destroys the bullet. Sets the wave requirements as well.
+// 
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.alien, function (sprite, otherSprite) {
     let AliensKilled = 0
     sprites.destroy(sprite)
@@ -25,7 +27,8 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.alien, function (sprite, oth
         StartWave(Wave)
     }
 })
-function AskReady () {
+// asks you if you are ready. If you say anything other than yes, the question will repeat itself.
+function AskReady (): any {
     while (Ready_check != "Yes") {
         Ready_check = game.askForString("Are you ready?", 3)
         if (Ready_check == "Yes") {
@@ -33,9 +36,12 @@ function AskReady () {
             game.splash("Welcome " + Username)
         } else {
             game.splash("You must type yes to proceed")
+            return AskReady()
         }
     }
 }
+// Every 100ms, if an alien is detected, then the bullets fire.
+// 
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (sprites.allOfKind(SpriteKind.alien).length > 0) {
         Bullet = sprites.create(img`
@@ -62,10 +68,15 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         Bullet.vx = 100
     }
 })
+// Sets up the alien to damage the turret with a pause in between attacks.
+// 
+// 
 sprites.onOverlap(SpriteKind.alien, SpriteKind.Turret, function (sprite, otherSprite) {
     info.changeLifeBy(-5)
     pause(500)
 })
+// Spawns scrawny aliens for waves 1-4/ Whether wave is 5 or 6, or 7 or 8, it spawns buff alien. If the wave is 9, it spawns a UFO BOSS. 
+// 
 function StartWave (Wavenum: number) {
     if (Wavenum <= 5) {
         for (let index = 0; index < 20; index++) {
@@ -175,11 +186,15 @@ function StartWave (Wavenum: number) {
             Mothership.setPosition(155, 37)
             Mothership.setVelocity(-5, 0)
         }
+        game.gameOver(true)
     }
 }
+// When the ufo hits the turret, game over=lose.
 sprites.onOverlap(SpriteKind.UFO, SpriteKind.Turret, function (sprite, otherSprite) {
     game.gameOver(false)
 })
+// Background is set up, sets the tower to the sprite of a kind player, sets the position of the turret, sets the wave to 1, sets lives to 10,000 and then starts the first wave.
+// 
 let Mothership: Sprite = null
 let Buff_alien: Sprite = null
 let scrawny_alien: Sprite = null
